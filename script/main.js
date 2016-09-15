@@ -60,6 +60,7 @@ function makePagination(elements, elPrSlide){
         if(i !== 0) studentList.css('display','none');
         listPages.push(studentList);
         //add pagination
+        if(nrOfSlides === 1) continue;
         var a = $('<a href="#">' + (i + 1) + '</a>');
         if(i === 0) a.addClass('active');
         a.on('click',paginationHandler);
