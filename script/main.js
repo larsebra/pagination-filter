@@ -29,7 +29,8 @@ var slickSettings = {
 function init(){
     //Init slick and add students
     $('.student-list').detach(); // Remove the list from the DOM, reference to the studentlist are saved in students
-    $('.page').append(makeSlickSlider(students, stdsPrPg)); //Make a slickContainer with students, 10 listings per slide
+    //Add slider
+    makePagination(students, stdsPrPg);
     //Add search field to DOM.
     var divSearch= $('<div></div>').addClass("student-search");
     divSearch.append(searchField)
@@ -40,35 +41,34 @@ function init(){
     searchField.on('keyup', keyUpHandler);
 }
 
-/** Function: makeSlickSlider
- *  Info: Makes or Updates the slick carousell. Creates 
- *  Param: elements, the elements to be added to the slides.
- *         elPrslide, decides how many element listings per slide.
- *  Return: slickContainer with classname slickContainer
- */
-function makeSlickSlider(elements, elPrSlide){
-    var slickContainer = $(".slickContainer");
-    if(slickContainer.length === 0){
-        slickContainer = $("<div></div>").addClass("slickContainer");
-        slickContainer.slick(slickSettings);
+function makePagination(elements, elPrSlide){
+    //If Slider is not present, Add slider to DOM
+    $('.pagination').remove();
+    $('ul.student-list').remove();
+    var pagination = $('<div></div>').addClass('pagination');
+    var nrOfSlides = Math.ceil(elements.length / elPrSlide);
+    var paginationList = $('<ul></ul>')
+    var listPages = [];
+    for(var i = 0; i < nrOfSlides; i++){
+        //add list elements
+        var studentList = $('<ul></ul>').addClass('student-list').attr('id',(i+1));;
+        var start = i * elPrSlide;
+        var end = start + elPrSlide;
+        end = (end > elements.length) ? elements.length : end;
+        var slice = elements.slice(start,end);
+        studentList.append(slice);
+        if(i !== 0) studentList.css('display','none');
+        listPages.push(studentList);
+        //add pagination
+        var a = $('<a href="#">' + (i + 1) + '</a>');
+        if(i === 0) a.addClass('active');
+        a.on('click',paginationHandler);
+        var li = $('<li></li>').append(a);
+        paginationList.append(li);
     }
-    else{
-        slickContainer.slick('removeSlide', null, null, true);
-    }
+    pagination.append(paginationList);
+    $('.page').append(listPages).append(pagination);
 
-    var pages = Math.ceil(elements.length / elPrSlide);//total pages, this gets automatically calculated based on stdsPrPg
-
-    for(var i = 0; i<pages; i++){
-        var start = i*stdsPrPg;
-        var end = start + stdsPrPg;
-        end = (end > elements.length)? elements.length : end;
-        var div = $('<div></div>');
-        var ul = $('<ul></ul>');
-        div.append(ul);
-        ul.append(elements.slice(start,end)); //Using slice. Slice does not alter the Original array, just returning a shallow copy(reference copy) array, thus the original array can be reused.
-        slickContainer.slick('slickAdd',div);
-    }
-    return slickContainer;
 }
 
 /** Function: search
@@ -113,7 +113,7 @@ function search(){
                 return 1;
         });
     }
-    makeSlickSlider(res, stdsPrPg);//Rerender slickslider with new elements
+    makePagination(res, stdsPrPg);
 }
 
 /** Function: searchBtnHandler
@@ -139,6 +139,16 @@ function keyUpHandler(){
         clearTimeout(timer);
     }
     timer = setTimeout(search, 600);
+}
+
+function paginationHandler(event){
+    $("div.pagination li a.active").removeClass('active');
+    $(this).addClass('active');
+    
+    $("ul.student-list").css('display','none')
+    var pageID = $(this).text(); 
+    console.log( $("ul.student-list[id="+ pageID +"]"));
+    $("div.page > ul[id="+ pageID +"]").css('display','block');
 }
 
 /* Init the app when all grapics and document is done rendering and loading. */
