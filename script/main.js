@@ -159,7 +159,6 @@ function paginationHandler(event){
 
         });
     });   
-    //Fade in new page
 }
 
 /* Init after all grapics and DOM elents are finished rendering and loading, show the ten first students */
