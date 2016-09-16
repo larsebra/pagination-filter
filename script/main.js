@@ -9,19 +9,7 @@ var searchBtn = $('<button></button>').text("search");
  * Settings variables
  */
 var stdsPrPg = 10; //students per page e.g listings per page.
-var slickSettings = {
-    dots: true,
-    dotsClass: "customDots",
-    fade: false,
-    speed: 500,
-    arrows: true,
-    slidesToScroll: 1,
-    slidesToShow: 1,
-    variableWidth: false,
-    swipeToSlide: false,
-    draggable: false,
-    infinite: false
-};
+var fadeDuration = 1000; //fade effect duration
 
 /**
  * Inits the application and does DOM manipulation after the document is ready
@@ -41,6 +29,12 @@ function init(){
     searchField.on('keyup', keyUpHandler);
 }
 
+/** Function: makePagination
+ *  Info: Makes pagination and slides from the given list. and appends it to the div page element.
+ *  Param: elements, the DOM elements that should be used to make the pagination
+ *         elPrSlide, number of elemens pr slides. Used to calculate pagination controls and list-items pr page.
+ *  Return: void
+ */
 function makePagination(elements, elPrSlide){
     //If Slider is not present, Add slider to DOM
     $('.pagination').remove();
@@ -57,17 +51,22 @@ function makePagination(elements, elPrSlide){
         end = (end > elements.length) ? elements.length : end;
         var slice = elements.slice(start,end);
         studentList.append(slice);
-        if(i !== 0) studentList.css('display','none');
         listPages.push(studentList);
+        if(i === 0)
+            studentList.addClass("active");
+        else
+            studentList.css('display','none');
         //add pagination
         if(nrOfSlides === 1) continue;
-        var a = $('<a href="#">' + (i + 1) + '</a>');
-        if(i === 0) a.addClass('active');
+        var a = $('<a href="#pagination">' + (i + 1) + '</a>');
+        if(i === 0)
+            a.addClass('active');
+
         a.on('click',paginationHandler);
         var li = $('<li></li>').append(a);
         paginationList.append(li);
     }
-    pagination.append(paginationList);
+    pagination.append(paginationList).append('<a name="pagination"></a>');
     $('.page').append(listPages).append(pagination);
 
 }
@@ -142,25 +141,29 @@ function keyUpHandler(){
     timer = setTimeout(search, 600);
 }
 
+/** Function: paginationHandler
+ *  Info: Handler for the pagination controls. Fades out the current page and fades in the new page.
+ *  Param: void
+ *  Return: void
+ */
 function paginationHandler(event){
     $("div.pagination li a.active").removeClass('active');
     $(this).addClass('active');
-    
-    $("ul.student-list").css('display','none')
-    var pageID = $(this).text(); 
-    console.log( $("ul.student-list[id="+ pageID +"]"));
-    $("div.page > ul[id="+ pageID +"]").css('display','block');
+    var currentPage = $("ul.student-list.active");
+    var newPage = $("div.page > ul[id="+ $(this).text() +"]");
+    //Fade out current page
+    currentPage.fadeTo(fadeDuration/2, 0, function(){
+        currentPage.toggleClass('active').css('display', 'none');
+        newPage.toggleClass('active').css("opacity","0").css('display','block');
+        newPage.fadeTo(fadeDuration/2, 1,function(){
+
+        });
+    });   
+    //Fade in new page
 }
 
-/* Init the app when all grapics and document is done rendering and loading. */
-/*$('document').ready(()=>{
-    
-  console.log("document ready");
-});*/
-
-/* Init after all grapics and DOM elents are finished rendering and loading */
-document.addEventListener('DOMContentLoaded', ()=>{
+/* Init after all grapics and DOM elents are finished rendering and loading, show the ten first students */
+document.addEventListener('DOMContentLoaded', function (){
     init();
-    console.log("loading")
 });
 
