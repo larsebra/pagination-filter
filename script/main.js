@@ -38,7 +38,7 @@ function init(){
 function makePagination(elements, elPrSlide){
     //If Slider is not present, Add slider to DOM
     $('.pagination').remove();
-    $('ul.student-list').remove();
+     $('ul.student-list').remove();
     var pagination = $('<div></div>').addClass('pagination');
     var nrOfSlides = Math.ceil(elements.length / elPrSlide);
     var paginationList = $('<ul></ul>')
@@ -66,9 +66,12 @@ function makePagination(elements, elPrSlide){
         var li = $('<li></li>').append(a);
         paginationList.append(li);
     }
+    var firstList = listPages[0];
     pagination.append(paginationList).append('<a name="pagination"></a>');
+    //fade in current list
+    firstList.css('opacity','0');
     $('.page').append(listPages).append(pagination);
-
+    firstList.fadeTo(fadeDuration/2, 1, null);
 }
 
 /** Function: search
@@ -113,7 +116,9 @@ function search(){
                 return 1;
         });
     }
-    makePagination(res, stdsPrPg);
+    $('ul.student-list.active').fadeOut(fadeDuration/2,function(){
+        makePagination(res, stdsPrPg);
+    });
 }
 
 /** Function: searchBtnHandler
@@ -146,7 +151,7 @@ function keyUpHandler(){
  *  Param: void
  *  Return: void
  */
-function paginationHandler(event){
+function paginationHandler(){
     $("div.pagination li a.active").removeClass('active');
     $(this).addClass('active');
     var currentPage = $("ul.student-list.active");
@@ -156,7 +161,6 @@ function paginationHandler(event){
         currentPage.toggleClass('active').css('display', 'none');
         newPage.toggleClass('active').css("opacity","0").css('display','block');
         newPage.fadeTo(fadeDuration/2, 1,function(){
-
         });
     });   
 }
